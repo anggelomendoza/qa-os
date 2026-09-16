@@ -4,6 +4,8 @@ A small, dependency-light Python script that validates a QASE "Test Designer / r
 
 No API calls, no QASE credentials, nothing project-specific hardcoded. Point it at a file, get a plain-text report.
 
+Reads both `.xlsx` (the "Test Designer / repository import" format) and `.csv` (the format you export from QASE after closing a crosscheck) — the format is detected from the file extension alone, and both are validated against the same column schema.
+
 ## Why this exists
 
 Manually built or edited QASE suites are easy to get subtly wrong in ways that don't show up until someone reviews the suite by hand: a required field left blank, an invalid enum value that slipped past a copy-paste, a suite path with a typo, step numbering with a gap. This script catches that class of mistake mechanically, so a human reviewer can spend their attention on the actual test design instead of re-checking formatting every time.
@@ -20,8 +22,9 @@ Manually built or edited QASE suites are easy to get subtly wrong in ways that d
 ## Usage
 
 ```bash
-pip install openpyxl
+pip install openpyxl   # only needed if you're validating .xlsx files
 python3 qase_schema_validator.py your_suite.xlsx
+python3 qase_schema_validator.py your_suite.csv
 ```
 
 Exit code is `1` if any error was found, `0` otherwise — usable as a gate in a script or CI step.

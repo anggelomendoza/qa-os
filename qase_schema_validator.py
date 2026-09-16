@@ -30,8 +30,16 @@ the title pattern, and which fields are required are passed through a
 config dict/JSON — see DEFAULT_CONFIG below, and examples/config.example.json
 for how to point it at a different naming convention.
 
+Accepts both the "Test Designer / repository import" .xlsx and the .csv
+you export from QASE after closing a crosscheck — the format is detected
+from the file extension alone. Both are validated against the same column
+schema (required_fields / enum_values / etc. in DEFAULT_CONFIG); if your
+.csv export uses different column names than the .xlsx, adjust them there
+or in your own config.
+
 Usage:
     python3 qase_schema_validator.py file.xlsx [--config config.json] [--out report.md]
+    python3 qase_schema_validator.py file.csv [--config config.json] [--out report.md]
 
 Exit code is 1 if any error was found, 0 otherwise (errors vs. warnings
 are always listed separately) — convenient for a pre-import check in a
@@ -40,14 +48,10 @@ script or CI step.
 
 import sys
 import re
+import csv
 import json
 import argparse
 from collections import defaultdict, Counter
-
-try:
-    import openpyxl
-except ImportError:
-    sys.exit("Missing openpyxl. Install with: pip install openpyxl")
 
 
 DEFAULT_CONFIG = {
@@ -94,7 +98,12 @@ def load_config(path):
     return cfg
 
 
-def read_rows(xlsx_path):
+def read_rows_xlsx(xlsx_path):
+    try:
+        import openpyxl
+    except ImportError:
+        sys.exit("Missing openpyxl for .xlsx files. Install with: pip install openpyxl")
+
     wb = openpyxl.load_workbook(xlsx_path, data_only=True)
     ws = wb.active
     headers = [c.value for c in ws[1]]
@@ -106,6 +115,40 @@ def read_rows(xlsx_path):
             continue  # fully empty row
         rows.append(row)
     return headers, col_idx, rows
+
+
+def read_rows_csv(csv_path):
+    # utf-8-sig tolerates the BOM that Excel/QASE sometimes adds on CSV export.
+    with open(csv_path, encoding="utf-8-sig", newline="") as f:
+        sample = f.read(4096)
+        f.seek(0)
+        try:
+            dialect = csv.Sniffer().sniff(sample, delimiters=",;\t")
+        except csv.Error:
+            dialect = csv.excel  # default to comma-separated
+        raw_rows = list(csv.reader(f, dialect))
+
+    if not raw_rows:
+        return [], {}, []
+
+    headers = raw_rows[0]
+    col_idx = {h: i for i, h in enumerate(headers) if h}
+    rows = []
+    for r in raw_rows[1:]:
+        row = {h: (r[i] if i < len(r) else None) for h, i in col_idx.items()}
+        if row.get("v2.id") is None and not any(v not in (None, "") for v in row.values()):
+            continue  # fully empty row
+        rows.append(row)
+    return headers, col_idx, rows
+
+
+def read_rows(path):
+    ext = path.rsplit(".", 1)[-1].lower() if "." in path else ""
+    if ext == "csv":
+        return read_rows_csv(path)
+    if ext in ("xlsx", "xlsm"):
+        return read_rows_xlsx(path)
+    sys.exit(f"Unsupported file format: '.{ext}'. Use a .xlsx or .csv exported from QASE.")
 
 
 def is_empty(v):
@@ -246,11 +289,11 @@ def validate(headers, col_idx, rows, cfg):
     return errors, warnings
 
 
-def format_report(xlsx_path, rows, errors, warnings):
+def format_report(file_path, rows, errors, warnings):
     lines = []
     lines.append("# QASE schema validation report")
     lines.append("")
-    lines.append(f"File: `{xlsx_path}`")
+    lines.append(f"File: `{file_path}`")
     lines.append(f"Cases analyzed: {len(rows)}")
     lines.append(f"Errors: {len(errors)} — Warnings: {len(warnings)}")
     lines.append("")
@@ -287,15 +330,15 @@ def format_report(xlsx_path, rows, errors, warnings):
 
 def main():
     ap = argparse.ArgumentParser(description="QASE schema validator")
-    ap.add_argument("xlsx", help="A .xlsx file in QASE 'Test Designer' import format")
+    ap.add_argument("file", help="A .xlsx (QASE 'Test Designer') or .csv (post-crosscheck export) file")
     ap.add_argument("--config", help="Config JSON (overrides DEFAULT_CONFIG)", default=None)
     ap.add_argument("--out", help="Output path for the .md report (default: stdout)", default=None)
     args = ap.parse_args()
 
     cfg = load_config(args.config)
-    headers, col_idx, rows = read_rows(args.xlsx)
+    headers, col_idx, rows = read_rows(args.file)
     errors, warnings = validate(headers, col_idx, rows, cfg)
-    report = format_report(args.xlsx, rows, errors, warnings)
+    report = format_report(args.file, rows, errors, warnings)
 
     if args.out:
         with open(args.out, "w", encoding="utf-8") as f:
