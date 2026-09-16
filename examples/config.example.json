@@ -1,0 +1,18 @@
+{
+  "_comment": "Example override for a project using a different case-title prefix and priority scale than the defaults in DEFAULT_CONFIG. Copy this file, adjust it to your own suite's conventions, and pass it with --config.",
+
+  "title_pattern": "^SCEN(\\d{4}) - .+",
+
+  "enum_values": {
+    "priority": ["P0", "P1", "P2", "P3"],
+    "severity": ["Blocker", "Critical", "Major", "Minor", "Trivial"],
+    "type": ["Functional", "Integration", "Regression"],
+    "behavior": ["Positive", "Negative"],
+    "automation": ["To Be Automated", "Automated", "Not To Automate"],
+    "status": ["Draft", "Actual"],
+    "is_flaky": ["False", "True"],
+    "is_muted": ["False", "True"],
+    "layer": ["Backend", "Frontend", "Mobile"],
+    "steps_type": ["Classic"]
+  }
+}
