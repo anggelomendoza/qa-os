@@ -1,5 +1,7 @@
 # QASE Schema Validator
 
+> Módulo de [QA-OS](../../README.md). Responde la pregunta "¿la suite está bien armada?". Para "¿cubre lo que tiene que cubrir?" ver [`gap-analyzer`](../../skills/gap-analyzer/).
+
 A small, dependency-light Python script that validates a QASE "Test Designer / repository import" `.xlsx` file **before** you upload it — instead of finding out about empty fields, invalid values, or malformed steps from a crosscheck after the cases are already live.
 
 No API calls, no QASE credentials, nothing project-specific hardcoded. Point it at a file, get a plain-text report.
@@ -23,8 +25,8 @@ Manually built or edited QASE suites are easy to get subtly wrong in ways that d
 
 ```bash
 pip install openpyxl   # only needed if you're validating .xlsx files
-python3 qase_schema_validator.py your_suite.xlsx
-python3 qase_schema_validator.py your_suite.csv
+python3 modules/schema-validator/qase_schema_validator.py your_suite.xlsx
+python3 modules/schema-validator/qase_schema_validator.py your_suite.csv
 ```
 
 Exit code is `1` if any error was found, `0` otherwise — usable as a gate in a script or CI step.
@@ -32,7 +34,7 @@ Exit code is `1` if any error was found, `0` otherwise — usable as a gate in a
 Output an .md report instead of stdout:
 
 ```bash
-python3 qase_schema_validator.py your_suite.xlsx --out report.md
+python3 modules/schema-validator/qase_schema_validator.py your_suite.xlsx --out report.md
 ```
 
 ## Adapting it to your own suite's conventions
@@ -40,7 +42,7 @@ python3 qase_schema_validator.py your_suite.xlsx --out report.md
 Nothing about title format, required fields, or valid enum values is hardcoded — they all live in `DEFAULT_CONFIG` at the top of the script, and you can override any of them with your own JSON:
 
 ```bash
-python3 qase_schema_validator.py your_suite.xlsx --config my_config.json
+python3 modules/schema-validator/qase_schema_validator.py your_suite.xlsx --config my_config.json
 ```
 
 See `examples/config.example.json` for a config that uses a different title prefix and a different priority/severity scale than the defaults.

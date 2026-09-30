@@ -1,0 +1,37 @@
+v2.id,title,description,preconditions,tags,priority,severity,type,behavior,automation,status,is_flaky,layer,steps_type,steps_actions,steps_result,steps_data,suite_id,suite_parent_id,suite,is_muted
+1,TC001 - Programar transferencia válida a contacto guardado,Verifica que se pueda programar una transferencia a un contacto guardado.,Usuario logueado con saldo $50.000 y un contacto guardado,@transferencias-programadas,High,Critical,Functional,Positive,To Be Automated,Draft,False,Frontend,Classic,"1. Ir a Transferir > Programar
+2. Elegir contacto, monto $5.000 y fecha dentro de 7 días
+3. Confirmar","1. Se muestra el formulario de programación
+2. Los datos quedan cargados sin errores
+3. La transferencia queda en estado Programada con los datos elegidos",,1,,Billetera Mora / Transferencias programadas,False
+2,TC002 - Fecha de ejecución mañana es aceptada,Verifica el borde inferior válido de la fecha de ejecución.,Usuario logueado con contacto guardado,@transferencias-programadas,High,Normal,Functional,Positive,To Be Automated,Draft,False,Frontend,Classic,"1. Programar transferencia con fecha = mañana
+2. Confirmar","1. La fecha se puede seleccionar
+2. La transferencia queda Programada",,1,,Billetera Mora / Transferencias programadas,False
+3,TC003 - Fecha de ejecución hoy es rechazada,Verifica que no se pueda programar para el día actual.,Usuario logueado con contacto guardado,@transferencias-programadas,Medium,Normal,Functional,Negative,To Be Automated,Draft,False,Frontend,Classic,1. Intentar elegir fecha = hoy,1. El calendario no permite seleccionar hoy,,1,,Billetera Mora / Transferencias programadas,False
+4,TC004 - Fecha de ejecución a 90 días es aceptada,Verifica el borde superior válido de la fecha de ejecución.,Usuario logueado con contacto guardado,@transferencias-programadas,Medium,Normal,Functional,Positive,To Be Automated,Draft,False,Frontend,Classic,"1. Programar transferencia con fecha = hoy + 90 días
+2. Confirmar","1. La fecha se puede seleccionar
+2. La transferencia queda Programada",,1,,Billetera Mora / Transferencias programadas,False
+5,TC005 - Monto menor al mínimo es rechazado,Verifica la validación de monto mínimo.,Usuario logueado con contacto guardado,@transferencias-programadas,Medium,Normal,Functional,Negative,To Be Automated,Draft,False,Frontend,Classic,"1. Ingresar monto $99
+2. Intentar confirmar","1. Se muestra error de monto mínimo
+2. No se permite continuar",,1,,Billetera Mora / Transferencias programadas,False
+6,TC006 - Monto mayor al límite diario es rechazado,Verifica la validación de límite diario.,Usuario con límite diario $500.000,@transferencias-programadas,High,Critical,Functional,Negative,To Be Automated,Draft,False,Frontend,Classic,"1. Ingresar monto $500.001
+2. Intentar confirmar","1. Se muestra error de límite diario
+2. No se permite continuar",,1,,Billetera Mora / Transferencias programadas,False
+7,TC007 - Aviso de día hábil siguiente al elegir un sábado,Verifica el aviso de reprogramación al elegir fin de semana.,Usuario logueado con contacto guardado,@transferencias-programadas,Medium,Normal,Functional,Positive,To Be Automated,Draft,False,Frontend,Classic,"1. Programar transferencia con fecha = próximo sábado
+2. Ir a confirmación","1. La fecha se puede seleccionar
+2. Se muestra 'Tu transferencia se hará el próximo día hábil: <lunes>' con la fecha correcta",,1,,Billetera Mora / Transferencias programadas,False
+8,TC008 - Ejecución exitosa con saldo suficiente,Verifica la ejecución de una transferencia programada con saldo.,"Transferencia Programada para hoy, usuario con saldo suficiente",@transferencias-programadas,High,Critical,Functional,Positive,To Be Automated,Draft,False,Frontend,Classic,"1. Esperar la corrida de ejecución
+2. Revisar estado e historial","1. La transferencia pasa a Ejecutada y se descuenta el saldo
+2. El movimiento aparece en el historial",,1,,Billetera Mora / Transferencias programadas,False
+9,TC009 - Ejecución sin saldo pasa a Fallida,Verifica el estado de una ejecución sin saldo suficiente.,"Transferencia Programada para hoy, usuario con saldo menor al monto",@transferencias-programadas,High,Critical,Functional,Negative,To Be Automated,Draft,False,Frontend,Classic,"1. Esperar la corrida de ejecución
+2. Revisar estado","1. No se descuenta saldo
+2. La transferencia queda en estado Fallida",,1,,Billetera Mora / Transferencias programadas,False
+10,TC010 - Cancelar transferencia programada con anticipación,Verifica la cancelación dentro del plazo permitido.,Transferencia Programada para dentro de 5 días,@transferencias-programadas,High,Critical,Functional,Positive,To Be Automated,Draft,False,Frontend,Classic,"1. Ir a Programadas
+2. Tocar Cancelar
+3. Confirmar","1. Se lista la transferencia
+2. Se pide confirmación
+3. Estado Cancelada y no se ejecuta en la fecha",,1,,Billetera Mora / Transferencias programadas,False
+11,TC011 - Botón Cancelar no aparece el día de ejecución,Verifica que no se pueda cancelar fuera de plazo desde la UI.,Transferencia Programada para hoy,@transferencias-programadas,Medium,Normal,Functional,Negative,To Be Automated,Draft,False,Frontend,Classic,"1. Ir a Programadas
+2. Ver el detalle de la transferencia","1. Se lista la transferencia
+2. El botón Cancelar no se muestra",,1,,Billetera Mora / Transferencias programadas,False
+12,TC012 - Límite de 10 transferencias programadas,Verifica el máximo de transferencias pendientes.,Usuario con 10 transferencias en estado Programada,@transferencias-programadas,Medium,Normal,Functional,Negative,To Be Automated,Draft,False,Frontend,Classic,1. Intentar programar una transferencia nueva,1. Se muestra error de máximo de transferencias programadas,,1,,Billetera Mora / Transferencias programadas,False

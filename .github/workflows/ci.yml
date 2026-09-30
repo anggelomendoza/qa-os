@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  schema-validator:
+    name: Schema validator
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r modules/schema-validator/requirements.txt
+
+      - name: La suite de ejemplo válida pasa
+        run: python3 modules/schema-validator/qase_schema_validator.py examples/billetera-transferencias-programadas/suite.csv
+
+      - name: La suite con errores sembrados es rechazada
+        run: |
+          if python3 modules/schema-validator/qase_schema_validator.py examples/billetera-transferencias-programadas/suite-con-errores.csv; then
+            echo "::error::El validador debería haber rechazado suite-con-errores.csv"
+            exit 1
+          fi
+          echo "Rechazada como se esperaba."
