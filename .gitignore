@@ -1,9 +1,14 @@
+# Python
 __pycache__/
 *.pyc
 .venv/
 venv/
+
+# Suites locales de trabajo (no se versionan salvo los ejemplos)
 *.xlsx
-!examples/*.xlsx
-*.md
-!README.md
-!examples/*.md
+!examples/**/*.xlsx
+!modules/**/examples/*.xlsx
+
+# Reportes generados por el validador (--out)
+reports/
+*.report.md
